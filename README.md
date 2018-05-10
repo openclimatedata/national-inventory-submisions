@@ -10,7 +10,7 @@ Run
 make
 ```
 
-to generate a list of all available submissions in `data`.
+to generate a list of all available submissions in `data` as a CSV file.
 
 Run
 ```
