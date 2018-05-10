@@ -17,5 +17,6 @@ Run
 make download-crf
 ```
 
-to download and unzip all CRF file into `downloads`. Zip files are stored in `archive`.
+to download and unzip all CRF Excel files into `downloads`.
+Zip files are stored in `archive`.
 
