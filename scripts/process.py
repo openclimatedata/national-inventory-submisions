@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 root = Path(__file__).parents[1]
 
+
+
 url = (
     "https://unfccc.int/process/transparency-and-reporting/"
     "reporting-and-review-under-the-convention/"
@@ -52,7 +54,7 @@ for target in targets:
         no_downloads.append((title, url))
 
 if len(no_downloads) > 0:
-    print("No downlaods for ", no_downloads)
+    print("No downloads for ", no_downloads)
 
 df = pd.DataFrame(downloads)
 df.to_csv(root / "data/submissions-2018.csv", index=False)
