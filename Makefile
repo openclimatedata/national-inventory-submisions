@@ -1,10 +1,14 @@
-all: data/submissions-2018.csv
+data-%: venv
+	./venv/bin/python scripts/process.py $(word 2, $(subst -, , $@))
 
-data/submissions-2018.csv: venv
-	./venv/bin/python scripts/process.py
+download-crf-%:
+	./venv/bin/python scripts/download.py CRF $(word 3, $(subst -, , $@))
 
-download-crf: data/submissions-2018.csv
-	./venv/bin/python scripts/download.py
+download-nir-%:
+	./venv/bin/python scripts/download.py NIR $(word 3, $(subst -, , $@))
+
+download-sef-%:
+	./venv/bin/python scripts/download.py SEF $(word 3, $(subst -, , $@))
 
 venv: scripts/requirements.txt
 	[ -d ./venv ] || python3 -m venv venv
@@ -14,7 +18,7 @@ venv: scripts/requirements.txt
 
 clean:
 	rm -rf data/*.csv
-	rm -rf downloads/*.xlsx
-	rm -rf archive/*.zip
+	rm -rf downloads/*
+	rm -rf archive/*
 
 .PHONY: clean download
