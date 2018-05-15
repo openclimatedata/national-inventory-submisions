@@ -7,16 +7,18 @@ Requires Python 3.
 Run
 
 ```
-make
+make data-2018
 ```
 
-to generate a list of all available submissions in `data` as a CSV file.
+to generate or update a list of all available submissions in `data` as a CSV file for the year 2018, or any other year from 2008.
 
-Run
+Run any of (adjusting the year as needed)
 ```
-make download-crf
+make download-crf-2018
+make download-nir-2018
+make download-sef-2018
 ```
 
-to download and unzip all CRF Excel files into `downloads`.
+to download and unzip all files into `downloads`.
 Zip files are stored in `archive`.
 
