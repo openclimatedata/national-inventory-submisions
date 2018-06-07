@@ -3,6 +3,7 @@ Scipts to download submission from the UNFCCC's
 
 Currently downloads files from the 2018 submission page.
 Requires Python 3.
+Dependencies can be installed in a virtual environment with `make venv`
 
 Run
 
@@ -22,3 +23,16 @@ make download-sef-2018
 to download and unzip all files into `downloads`.
 Zip files are stored in `archive`.
 
+On Windows (or if make is not available the Python scripts can be run directly as well,
+the libraries in `script/requirements.txt` need to be available.
+
+To update the list of files for a specific year:
+```
+python scripts/process.py 2018
+```
+
+To download (CRD, NIR, or SEF as category):
+
+```
+python scripts/download.py CRF 2018
+```
