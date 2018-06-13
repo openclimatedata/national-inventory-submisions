@@ -1,5 +1,6 @@
 import argparse
 import requests
+import time
 import pandas as pd
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -66,9 +67,18 @@ for link in links:
 # Go through sub-pages.
 for target in targets:
     url = target["url"]
-    subpage = requests.get(url)
-    html = BeautifulSoup(subpage.content, "html.parser")
-    title = html.find("h1").contents[0]
+    while True:
+        try:
+            subpage = requests.get(url, timeout=15.5)
+            html = BeautifulSoup(subpage.content, "html.parser")
+            title = html.find("h1").contents[0]
+            break
+        except AttributeError:
+            print("Error fetching " + target["url"])
+            print("Retrying ...")
+            time.sleep(1)
+            continue
+
     h2 = html.find("h2", text="Versions")
     if h2:
         div = h2.findNext("div")
