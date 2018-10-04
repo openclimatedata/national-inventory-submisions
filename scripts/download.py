@@ -46,7 +46,7 @@ for idx, submission in items.iterrows():
     local_filename = archive_path / url.split('/')[-1]
     if not local_filename.exists():
         r = requests.get(url, stream=True)
-        with open(local_filename, 'wb') as f:
+        with open(str(local_filename), 'wb') as f:
             shutil.copyfileobj(r.raw, f)
 
         print("Download => archive/{}/".format(year) + local_filename.name)
@@ -62,5 +62,3 @@ for idx, submission in items.iterrows():
         print("Error while trying to extract " + str(download_path))
     except NotImplementedError:
         print("Zip format not supported, please unzip on the command line.")
-
-
