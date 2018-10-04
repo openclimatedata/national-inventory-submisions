@@ -84,8 +84,7 @@ for target in targets:
         div = h2.findNext("div")
         links = div.findAll("a")
         if len(links) > 1:
-            raise ValueError("More than one link found. Please update script"
-                             " to handle multiple links.")
+            print("Warning: More than one link found. Downloading only the first file.")
         zipfile = links[0].attrs["href"]
         downloads.append({"Title": title, "URL": zipfile})
         print("\t".join([title, url, zipfile]))
