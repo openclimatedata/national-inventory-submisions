@@ -31,7 +31,7 @@ items = submissions[submissions.URL.str.contains(regexp)]
 # Ensure download path exists and remove earlier versions.
 download_path = root / "downloads/{}{}".format(category, year)
 if download_path.exists():
-    shutil.rmtree(download_path)
+    shutil.rmtree(str(download_path))
 download_path.mkdir(parents=True)
 
 for idx, submission in items.iterrows():
@@ -53,8 +53,8 @@ for idx, submission in items.iterrows():
     else:
         print("=> Already downloaded " + local_filename.name)
     try:
-        zipped_file = zipfile.ZipFile(local_filename, 'r')
-        zipped_file.extractall(download_path)
+        zipped_file = zipfile.ZipFile(str(local_filename), 'r')
+        zipped_file.extractall(str(download_path))
         print("Extracted {} files.".format(len(zipped_file.namelist())))
         zipped_file.close()
     # TODO Better error logging/visibilty
