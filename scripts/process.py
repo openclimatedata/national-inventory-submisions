@@ -30,6 +30,14 @@ url = (
 if int(year) < 2017:
     url = ("https://unfccc.int/process/transparency-and-reporting/reporting-and-review-under-the-convention/greenhouse-gas-inventories/submissions-of-annual-greenhouse-gas-inventories-for-2017/submissions-of-annual-ghg-inventories-{}".format(year))
 
+if int(year) >= 2019:
+    url = (
+           "https://unfccc.int/process-and-meetings/transparency-and-reporting/"
+           "reporting-and-review-under-the-convention/"
+           "greenhouse-gas-inventories-annex-i-parties/"
+           "national-inventory-submissions-{}".format(year)
+          )
+
 result = requests.get(url)
 
 html = BeautifulSoup(result.content, "html.parser")
