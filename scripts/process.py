@@ -24,11 +24,9 @@ url = (
     "https://unfccc.int/process/transparency-and-reporting/"
     "reporting-and-review-under-the-convention/"
     "greenhouse-gas-inventories-annex-i-parties/"
-    "national-inventory-submissions-{}".format(year)
+    "submissions/national-inventory-submissions-{}".format(year)
 )
 
-if int(year) < 2017:
-    url = ("https://unfccc.int/process/transparency-and-reporting/reporting-and-review-under-the-convention/greenhouse-gas-inventories/submissions-of-annual-greenhouse-gas-inventories-for-2017/submissions-of-annual-ghg-inventories-{}".format(year))
 
 if int(year) >= 2019:
     url = (
@@ -37,6 +35,9 @@ if int(year) >= 2019:
            "greenhouse-gas-inventories-annex-i-parties/"
            "national-inventory-submissions-{}".format(year)
           )
+
+
+print(url)
 
 result = requests.get(url)
 
