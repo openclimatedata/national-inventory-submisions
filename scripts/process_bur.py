@@ -52,23 +52,15 @@ pattern = re.compile(r"BUR ?\d")
 # Go through sub-pages.
 for target in targets:
     url = target["url"]
-    while True:
-        try:
-            subpage = requests.get(url, timeout=15.5)
-            html = BeautifulSoup(subpage.content, "html.parser")
-            title = html.find("h1").contents[0]
-            match = pattern.search(title)
-            if match:
-                kind = match.group(0)
-            else:
-                kind = None
-                print("PRoblem with", title)
-            break
-        except AttributeError:
-            print("Error fetching " + target["url"])
-            print("Retrying ...")
-            time.sleep(1)
-            continue
+    subpage = requests.get(url, timeout=15.5)
+    html = BeautifulSoup(subpage.content, "html.parser")
+    title = html.find("h1").contents[0]
+    match = pattern.search(title)
+    if match:
+        kind = match.group(0).replace(" ", "")
+    else:
+        kind = None
+
 
     h2 = html.find("h2", text="Versions")
     if h2:
@@ -99,11 +91,9 @@ for target in targets:
                         kind = "NIR"
                     elif "NC" in title:
                         kind = "NC"
-
-                print("PRoblem with", title)
             downloads.append(
                 {
-                    "Kind": kind.replace(" ", ""),
+                    "Kind": kind,
                     "Country": country,
                     "Title": title,
                     "URL": url,
