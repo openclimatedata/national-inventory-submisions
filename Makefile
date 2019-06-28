@@ -1,7 +1,7 @@
 data-%: venv
 	./venv/bin/python scripts/process.py $(word 2, $(subst -, , $@))
 
-bur: venv
+data-bur: venv
 	./venv/bin/python scripts/process_bur.py
 
 download-crf-%: venv
