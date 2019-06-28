@@ -4,6 +4,9 @@ data-%: venv
 data-bur: venv
 	./venv/bin/python scripts/process_bur.py
 
+download-bur: venv
+	./venv/bin/python scripts/download_bur.py
+
 download-crf-%: venv
 	./venv/bin/python scripts/download.py CRF $(word 3, $(subst -, , $@))
 

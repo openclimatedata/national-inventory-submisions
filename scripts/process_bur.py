@@ -108,4 +108,4 @@ if len(no_downloads) > 0:
 
 df = pd.DataFrame(downloads)
 df = df[["Kind", "Country", "Title", "URL"]]
-df.to_csv(root / "data/bur-submissions.csv", index=False)
+df.to_csv(root / "data/submissions-bur.csv", index=False)
