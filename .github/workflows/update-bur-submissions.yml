@@ -1,4 +1,4 @@
-name: Update Biennial Update Report submissions
+name: Daily BUR Submissions Update
 on:
   schedule:
     - cron:  '0 3 * * *'
