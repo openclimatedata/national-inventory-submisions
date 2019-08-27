@@ -1,4 +1,4 @@
-Scipts to download submission from the UNFCCC's
+Scripts to download submission from the UNFCCC's
 [National Inventory Submissions page](https://unfccc.int/process-and-meetings/transparency-and-reporting/reporting-and-review-under-the-convention/greenhouse-gas-inventories-annex-i-parties/national-inventory-submissions-2019)
 
 It can downnload files for any submission page by specifying the requested year.
