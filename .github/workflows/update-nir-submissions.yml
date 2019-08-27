@@ -1,4 +1,4 @@
-name: Update National Inventory Report submissions
+name: Daily NIR Submissions Update
 on:
   schedule:
     - cron:  '0 4 * * *'
