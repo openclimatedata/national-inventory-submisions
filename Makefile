@@ -3,8 +3,8 @@ help:
 	echo Options:
 	echo make data-bur: Download BUR submissions data
 	echo make download-bur: Download BUR submissions
-	echo make data 2019: Download NIR submissions data for 2019
-	echo make download-crf 2019: Download NIR submissions data for 2019
+	echo make data-2019: Download NIR submissions data for 2019
+	echo make download-crf-2019: Download NIR submissions data for 2019
 	echo Download options: "crf, ""nir" and "sef" .
 
 data-%: venv
