@@ -1,9 +1,14 @@
 import argparse
-import requests
+#import requests
 import time
 import pandas as pd
+#import os
 from pathlib import Path
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from random import randrange
+
+max_tries = 10
 
 root = Path(__file__).parents[1]
 
@@ -28,7 +33,7 @@ url = (
 )
 
 
-if int(year) >= 2019:
+if int(year) == 2019:
     url = (
            "https://unfccc.int/process-and-meetings/transparency-and-reporting/"
            "reporting-and-review-under-the-convention/"
@@ -36,13 +41,46 @@ if int(year) >= 2019:
            "national-inventory-submissions-{}".format(year)
           )
 
+if int(year) == 2020:
+    url = (
+            "https://unfccc.int/ghg-inventories-annex-i-parties/{}".format(year)
+            )
 
 print(url)
 
-result = requests.get(url)
+#result = requests.get(url)
 
-html = BeautifulSoup(result.content, "html.parser")
+# set options for headless mode
+options = webdriver.firefox.options.Options()
+options.add_argument('-headless')
+
+# create profile for headless mode and automatical downloading
+profile = webdriver.FirefoxProfile()
+
+# set up selenium driver
+driver = webdriver.Firefox(options = options, firefox_profile = profile)
+driver.get(url)
+
+
+html = BeautifulSoup(driver.page_source, "html.parser")
+
+
 table = html.find("table")
+
+# check if table found. if not the get command didn't work, likely because of a captcha on the site
+### TODO replace by error message
+if not(table):
+    # try to load htm file from disk
+    print('Download failed, trying to load manually downloaded file')
+    file = open("manual_page_downloads/National-Inventory-Submissions-{}.html".format(year))
+    content = file.read()
+    html = BeautifulSoup(content, "html.parser")
+    table = html.find("table")
+    if not(table):
+        print("Manually downloaded file " + "manual_page_downloads/National-Inventory-Submissions-{}.html".format(year) + 
+              " not found")
+        exit()
+    
 links = table.findAll('a')
 
 targets = []  # sub-pages
@@ -75,18 +113,27 @@ for link in links:
 
 # Go through sub-pages.
 for target in targets:
+    time.sleep(randrange(5, 15))
     url = target["url"]
-    while True:
+    i = 0
+    while i < max_tries:
         try:
-            subpage = requests.get(url, timeout=15.5)
-            html = BeautifulSoup(subpage.content, "html.parser")
+            #subpage = requests.get(url, timeout=15.5)
+            #html = BeautifulSoup(subpage.content, "html.parser")
+            driver.get(url)
+            html = BeautifulSoup(driver.page_source, "html.parser")
             title = html.find("h1").contents[0]
             break
         except AttributeError:
             print("Error fetching " + target["url"])
             print("Retrying ...")
-            time.sleep(1)
+            time.sleep(randrange(5, 15))
+            i += 1
             continue
+    
+    if i == max_tries:
+        print("Aborting after {}".format(max_tries) + " tries")
+        quit()
 
     h2 = html.find("h2", text="Versions")
     if h2:
@@ -103,5 +150,6 @@ for target in targets:
 if len(no_downloads) > 0:
     print("No downloads for ", no_downloads)
 
+driver.close()
 df = pd.DataFrame(downloads)
 df.to_csv(root / "data/submissions-{}.csv".format(year), index=False)

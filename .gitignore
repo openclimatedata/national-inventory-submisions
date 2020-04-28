@@ -1,4 +1,7 @@
 downloads/*
 archive/*/*.zip
 archive/*/*.xlsx
+archive/*/*.csv
 venv
+geckodriver.log
+scripts/geckodriver.log
