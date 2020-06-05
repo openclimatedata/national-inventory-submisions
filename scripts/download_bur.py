@@ -52,6 +52,7 @@ driver = webdriver.Firefox(options = options, firefox_profile = profile)
 
 # visit the main data page once to create cookies
 driver.get(url)
+time.sleep(10)
 
 # get the session id cookie
 cookies_selenium = driver.get_cookies()
