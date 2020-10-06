@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import shutil
 import time
+import os
 from datetime import date
 from selenium import webdriver
 from random import randrange
@@ -17,7 +18,7 @@ root = Path(__file__).parents[1]
 submissions = pd.read_csv(root / "data/submissions-bur.csv")
 
 # use the CRF data url,for some reson visinting the BUR url is not enough to generate the necessary cookies
-url = "https://unfccc.int/ghg-inventories-annex-i-parties/2020"
+url = "https://unfccc.int/BURs"
 
 BUR_folders = {
         'BUR1': 'first_bur_files',
@@ -41,7 +42,7 @@ for BUR in present_BURs:
 
 # set options for headless mode
 options = webdriver.firefox.options.Options()
-options.add_argument('-headless')
+#options.add_argument('-headless')
 
 # create profile for headless mode 
 profile = webdriver.FirefoxProfile()
@@ -52,7 +53,7 @@ driver = webdriver.Firefox(options = options, firefox_profile = profile)
 
 # visit the main data page once to create cookies
 driver.get(url)
-time.sleep(10)
+time.sleep(20)
 
 # get the session id cookie
 cookies_selenium = driver.get_cookies()
@@ -74,18 +75,50 @@ for idx, submission in submissions.iterrows():
     print(title)
 
     local_filename = download_path / BUR_folders[bur] / country / url.split('/')[-1]
-    if not local_filename.exists():
-        if not local_filename.parent.exists():
-            local_filename.parent.mkdir()
-        r = requests.get(url, stream=True, cookies = cookies)
-        with open(str(local_filename), 'wb') as f:
-            shutil.copyfileobj(r.raw, f)
+    if not local_filename.parent.exists():
+        local_filename.parent.mkdir()
+    
+    if local_filename.exists():
+        # check file size. if 210 bytes it's the error page
+        if Path(local_filename).stat().st_size == 210:
+            # found the error page. delte file
+            os.remove(local_filename)
+    
+    if not local_filename.exists():            
+        i = 0 # reset counter    
+        while not local_filename.exists() and i < 10:
+            # for i = 0 and i = 5 try to get a new session ID
+            if i == 1 or i == 5:
+                driver = webdriver.Firefox(options = options, firefox_profile = profile)
+    
+                # visit the main data page once to create cookies
+                driver.get(url)
+                time.sleep(20)
+                
+                # get the session id cookie
+                cookies_selenium = driver.get_cookies()
+                cookies = {}
+                for cookie in cookies_selenium:
+                    cookies[cookie['name']] = cookie['value']
+                    
+            r = requests.get(url, stream=True, cookies = cookies)
+            with open(str(local_filename), 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+            
+            # check file size. if 210 bytes it's the error page
+            if Path(local_filename).stat().st_size == 210:
+                # found the error page. delte file
+                os.remove(local_filename)
+            
+            # sleep a bit to avoid running into captchas
+            time.sleep(randrange(5, 15))
+            
+        if local_filename.exists():
+            new_downloaded.append(submission)
+            print("Download => download/BUR/" + BUR_folders[bur] + "/" + country + "/" + local_filename.name)
+        else:
+            print("Failed downloading download/BUR/" + BUR_folders[bur] + "/" + country + "/" + local_filename.name)
         
-        new_downloaded.append(submission)
-        print("Download => download/BUR/" + BUR_folders[bur] + "/" + country + "/" + local_filename.name)
-        
-        # sleep a bit to avoid running into captchas
-        time.sleep(randrange(5, 15))
     else:
         print("=> Already downloaded " + local_filename.name)
 
