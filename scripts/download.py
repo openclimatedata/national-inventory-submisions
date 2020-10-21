@@ -69,7 +69,7 @@ print("Archiving data to " + str(archive_path.absolute()))
 
 # set options for headless mode
 options = webdriver.firefox.options.Options()
-options.add_argument('-headless')
+#options.add_argument('-headless')
 
 # create profile for headless mode 
 profile = webdriver.FirefoxProfile()
