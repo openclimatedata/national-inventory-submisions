@@ -9,6 +9,7 @@ import time
 from random import randrange
 from selenium import webdriver
 from pathlib import Path
+import os
 
 descr = 'Download and unzip data from UNFCCC National Inventory Submissions'
 parser = argparse.ArgumentParser(description=descr)
@@ -44,7 +45,7 @@ if int(year) == 2019:
            "national-inventory-submissions-{}".format(year)
           )
 
-if int(year) == 2020:
+if int(year) >= 2020:
     url = (
             "https://unfccc.int/ghg-inventories-annex-i-parties/{}".format(year)
             )
@@ -53,6 +54,7 @@ if int(year) == 2020:
 submissions = pd.read_csv(root / "data/submissions-{}.csv".format(year))
 regexp = re.compile(r"[-_]{}[-_]".format(category.lower()))
 items = submissions[submissions.URL.str.contains(regexp)]
+error_file_sizes = [212, 210]
 
 # Ensure download path exists and remove earlier versions.
 download_path = root / "downloads/{}{}".format(category, year)
@@ -76,7 +78,7 @@ profile = webdriver.FirefoxProfile()
 profile.set_preference('browser.download.folderList', 2)
 
 # set up selenium driver
-driver = webdriver.Firefox(options = options, firefox_profile = profile)
+driver = webdriver.Firefox(options=options, firefox_profile=profile)
 
 # visit the main data page once to initiate a session ID
 driver.get(url)
@@ -88,7 +90,7 @@ cookies = {}
 for cookie in cookies_selenium:
     cookies[cookie['name']] = cookie['value']
 
-print(cookies)
+# print(cookies)
 #quit()
 
 new_downloaded = []
@@ -101,23 +103,47 @@ for idx, submission in items.iterrows():
     print(url)
 
     local_filename = archive_path / url.split('/')[-1]
-    if not local_filename.exists():
-        r = requests.get(url, stream = True, cookies = cookies)
-        with open(str(local_filename), 'wb') as f:
-            shutil.copyfileobj(r.raw, f)
-        
-        # save the file automatically (unless it is of unknown type)
-        #driver.get(url)
-                
-        # save the file using wget with the sessionID obtained from silenium
-        #wget.download() --cookies=on --header "Cookie: ${COOKIE}=${COOKIE_VALUE}" -O ${OUTPUT_DIR}${/}${FILENAME} ${URL}
-        
-        new_downloaded.append(submission)
 
-        print("Download => archive/{}/".format(year) + local_filename.name)
-        
-        # sleep a bit to avoid running into captchas
-        time.sleep(randrange(5, 15))
+    if local_filename.exists():
+        # check file size. if 210 or 212 bytes it's the error page
+        if Path(local_filename).stat().st_size in error_file_sizes:
+            # found the error page. delete file
+            os.remove(local_filename)
+
+    if not local_filename.exists():
+        i = 0  # reset counter
+        while not local_filename.exists() and i < 10:
+            # for i = 0 and i = 5 try to get a new session ID
+            if i == 1 or i == 5:
+                driver = webdriver.Firefox(options=options, firefox_profile=profile)
+
+                # visit the main data page once to create cookies
+                driver.get(url)
+                time.sleep(20)
+
+                # get the session id cookie
+                cookies_selenium = driver.get_cookies()
+                cookies = {}
+                for cookie in cookies_selenium:
+                    cookies[cookie['name']] = cookie['value']
+
+            r = requests.get(url, stream=True, cookies=cookies)
+            with open(str(local_filename), 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+
+            # check file size. if 210 bytes it's the error page
+            if Path(local_filename).stat().st_size in error_file_sizes:
+                # found the error page. delete file
+                os.remove(local_filename)
+
+            # sleep a bit to avoid running into captchas
+            time.sleep(randrange(5, 15))
+
+        if local_filename.exists():
+            new_downloaded.append(submission)
+            print("Download => archive/{}/".format(year) + local_filename.name)
+        else:
+            print("Failed to download => archive/{}/".format(year) + local_filename.name)
     else:
         print("=> Already downloaded " + local_filename.name)
     try:

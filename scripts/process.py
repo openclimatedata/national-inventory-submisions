@@ -41,7 +41,7 @@ if int(year) == 2019:
            "national-inventory-submissions-{}".format(year)
           )
 
-if int(year) == 2020:
+if int(year) >= 2020:
     url = (
             "https://unfccc.int/ghg-inventories-annex-i-parties/{}".format(year)
             )
