@@ -1,10 +1,12 @@
-import requests
+#import requests
 import time
 import pandas as pd
 import re
 
 from pathlib import Path
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from random import randrange
 
 root = Path(__file__).parents[1]
 
@@ -19,9 +21,19 @@ url = "https://unfccc.int/BURs"
 
 print(url)
 
-result = requests.get(url)
+# set options for headless mode
+options = webdriver.firefox.options.Options()
+options.add_argument('-headless')
 
-html = BeautifulSoup(result.content, "html.parser")
+# create profile for headless mode and automatical downloading
+profile = webdriver.FirefoxProfile()
+
+# set up selenium driver
+driver = webdriver.Firefox(options = options, firefox_profile = profile)
+driver.get(url)
+
+
+html = BeautifulSoup(driver.page_source, "html.parser")
 table = html.find_all("table")[1]
 links = table.findAll("a")
 
@@ -51,9 +63,11 @@ pattern = re.compile(r"BUR ?\d")
 
 # Go through sub-pages.
 for target in targets:
+    time.sleep(randrange(5, 15))
     url = target["url"]
-    subpage = requests.get(url, timeout=15.5)
-    html = BeautifulSoup(subpage.content, "html.parser")
+    #subpage = requests.get(url, timeout=15.5)
+    driver.get(url)
+    html = BeautifulSoup(driver.page_source, "html.parser")
     title = html.find("h1").contents[0]
     match = pattern.search(title)
     if match:
@@ -106,6 +120,7 @@ for target in targets:
 if len(no_downloads) > 0:
     print("No downloads for ", no_downloads)
 
+driver.close()
 df = pd.DataFrame(downloads)
 df = df[["Kind", "Country", "Title", "URL"]]
 df.to_csv(root / "data/submissions-bur.csv", index=False)
